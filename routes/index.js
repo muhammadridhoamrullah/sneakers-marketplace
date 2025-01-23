@@ -44,6 +44,21 @@ router.get("/brands", Controller.getAllBrands);
 router.put("/sneakers/:id", authenticationSneaker, Controller.updateSneaker);
 router.delete("/sneakers/:id", authenticationSneaker, Controller.deleteSneaker);
 
+// ### Endpoint Lelang (Terotentikasi)
+
+// - `POST /auctions`
+// - `GET /auctions`
+// - `GET /auctions/:id`
+// - `POST /auctions/:id/bid`
+// - `GET /auctions/:id/bids`
+
+router.post("/auctions", Controller.addAuction);
+router.get("/auctions", Controller.getAllAuctions);
+router.get("/auctions/:id", Controller.getAuctionById);
+router.post("/auctions/:id/bid", Controller.bidAuction);
+router.get("/auctions/:id/bids", Controller.getBidByAuctionId);
+router.post("/auctions/:id/end", Controller.endAuction);
+
 router.use(errorHandling);
 
 module.exports = {

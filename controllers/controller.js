@@ -339,6 +339,295 @@ class Controller {
       next(error);
     }
   }
+
+  static async addAuction(req, res, next) {
+    try {
+      const {
+        SneakerId,
+        startingPrice,
+        reservePrice,
+        minBidIncrement,
+        startTime,
+        endTime,
+        buyNowPrice,
+      } = req.body;
+
+      if (
+        !SneakerId ||
+        !startingPrice ||
+        !minBidIncrement ||
+        !startTime ||
+        !endTime
+      ) {
+        throw { name: "INVALID_INPUT_AUCTION" };
+      }
+
+      const findSneaker = await Sneaker.findByPk(SneakerId);
+
+      if (!findSneaker) {
+        throw { name: "DATA_NOT_FOUND" };
+      }
+      console.log(findSneaker.UserId, "ini FindSneaker.UserId");
+      console.log(req.user.id, "ini req.user.id");
+
+      if (findSneaker.UserId === req.user.id || req.user.role === "Admin") {
+        const addToAuction = await Auction.create({
+          SneakerId,
+          startingPrice,
+          currentPrice: startingPrice,
+          reservePrice,
+          minBidIncrement,
+          startTime,
+          endTime,
+          minBidIncrement,
+          buyNowPrice,
+          status: "Active",
+          UserId: req.user.id,
+        });
+
+        res.status(201).json({
+          message: "Auction has been added",
+          data: addToAuction,
+        });
+      } else {
+        throw { name: "FORBIDDEN" };
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async getAllAuctions(req, res, next) {
+    try {
+      const allAuctions = await Auction.findAll({
+        include: [
+          {
+            model: Sneaker,
+          },
+          {
+            model: User,
+            as: "Seller",
+            attributes: {
+              exclude: ["password"],
+            },
+          },
+          {
+            model: User,
+            as: "Winner",
+            attributes: {
+              exclude: ["password"],
+            },
+          },
+        ],
+      });
+
+      res.status(200).json({
+        data: allAuctions,
+      });
+    } catch (error) {
+      console.log(error, "error di getAllAuctions");
+
+      next(error);
+    }
+  }
+
+  static async getAuctionById(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      const findAuctionById = await Auction.findByPk(id, {
+        include: [
+          {
+            model: Sneaker,
+          },
+          {
+            model: User,
+            as: "Seller",
+            attributes: {
+              exclude: ["password"],
+            },
+          },
+          {
+            model: User,
+            as: "Winner",
+            attributes: {
+              exclude: ["password"],
+            },
+          },
+        ],
+      });
+
+      if (!findAuctionById) {
+        throw { name: "DATA_NOT_FOUND" };
+      }
+
+      res.status(200).json({
+        data: findAuctionById,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async bidAuction(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { amount, autoBidLimit } = req.body;
+
+      const findAuction = await Auction.findByPk(id, {
+        include: {
+          model: Sneaker,
+        },
+      });
+
+      if (!findAuction) {
+        throw { name: "DATA_NOT_FOUND" };
+      }
+
+      if (findAuction.status === "Closed") {
+        throw { name: "AUCTION_CLOSED" };
+      }
+      if (!amount) {
+        throw { name: "AMOUNT_REQUIRED" };
+      }
+      const findHighestBid = await Bid.findOne({
+        where: {
+          AuctionId: id,
+          isHighestBid: true,
+        },
+      });
+
+      if (amount <= findAuction.minBidIncrement) {
+        throw { name: "INVALID_AMOUNT_MIN" };
+      }
+
+      if (findHighestBid) {
+        if (amount < findHighestBid.amount + findAuction.minBidIncrement) {
+          throw { name: "INVALID_AMOUNT" };
+        }
+
+        await Bid.update(
+          { isHighestBid: false },
+          { where: { id: findHighestBid.id } }
+        );
+      }
+
+      const newBid = await Bid.create({
+        AuctionId: id,
+        UserId: req.user.id,
+        amount,
+        autoBidLimit,
+        isHighestBid: true,
+        timestamp: new Date(),
+        status: "Active",
+      });
+
+      await Auction.update(
+        { currentPrice: amount, totalBids: findAuction.totalBids + 1 },
+        { where: { id } }
+      );
+
+      res.status(201).json({
+        message: "Bid has been placed",
+        data: newBid,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async getBidByAuctionId(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      const findBidByAuctionId = await Bid.findAll({
+        where: {
+          AuctionId: id,
+        },
+        include: [
+          {
+            model: User,
+            attributes: {
+              exclude: ["password"],
+            },
+          },
+          {
+            model: Auction,
+            include: {
+              model: Sneaker,
+            },
+          },
+        ],
+        order: [["amount", "DESC"]],
+      });
+
+      if (findBidByAuctionId.length === 0) {
+        throw { name: "DATA_NOT_FOUND" };
+      }
+
+      res.status(200).json({
+        data: findBidByAuctionId,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async endAuction(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      const findAuction = await Auction.findByPk(id, {
+        include: {
+          model: Bid,
+          include: {
+            model: User,
+            attributes: {
+              exclude: ["password"],
+            },
+          },
+        },
+      });
+
+      if (!findAuction) {
+        throw { name: "DATA_NOT_FOUND" };
+      }
+
+      if (findAuction.status === "Closed") {
+        throw { name: "AUCTION_ALREADY_CLOSED" };
+      }
+
+      const highestBid = await Bid.findOne({
+        where: {
+          AuctionId: id,
+          isHighestBid: true,
+        },
+        include: {
+          model: User,
+          attributes: {
+            exclude: ["password"],
+          },
+        },
+      });
+
+      if (!highestBid) {
+        throw { name: "NO_BIDS_FOUND" };
+      }
+
+      await Auction.update(
+        { status: "Closed", WinnerId: highestBid.UserId },
+        { where: { id } }
+      );
+
+      res.status(200).json({
+        message: "Auction has been closed",
+        winner: highestBid.User,
+        winningBid: highestBid.amount,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = {

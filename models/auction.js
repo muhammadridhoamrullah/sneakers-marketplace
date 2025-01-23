@@ -12,8 +12,8 @@ module.exports = (sequelize, DataTypes) => {
       Auction.hasMany(models.Bid, { foreignKey: "AuctionId" });
       Auction.hasMany(models.UserRating, { foreignKey: "AuctionId" });
       Auction.belongsTo(models.Sneaker, { foreignKey: "SneakerId" });
-      Auction.belongsTo(models.User, { foreignKey: "UserId" });
-      Auction.belongsTo(models.User, { foreignKey: "WinnerId" });
+      Auction.belongsTo(models.User, { as: "Seller", foreignKey: "UserId" });
+      Auction.belongsTo(models.User, { as: "Winner", foreignKey: "WinnerId" });
     }
   }
   Auction.init(

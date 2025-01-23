@@ -10,7 +10,7 @@
     "allowAutoBid": true,
     "buyNowPrice": 2200000,
     "status": "Active",
-    "WinnerId": null,
+    "WinnerId": 4,
     "UserId": 2,
     "totalBids": 5
   },
@@ -25,7 +25,7 @@
     "allowAutoBid": true,
     "buyNowPrice": 3000000,
     "status": "Active",
-    "WinnerId": null,
+    "WinnerId": 5,
     "UserId": 2,
     "totalBids": 3
   }

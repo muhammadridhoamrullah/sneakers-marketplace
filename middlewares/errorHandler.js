@@ -30,6 +30,21 @@ async function errorHandling(err, req, res, next) {
     res.status(400).json({ message: "Update Failed" });
   } else if (err.name === "DELETE_FAILED") {
     res.status(400).json({ message: "Delete Failed" });
+  } else if (err.name === "INVALID_INPUT_AUCTION") {
+    res.status(400).json({
+      message:
+        "SneakerId, startingPrice, minBidIncrement, startTime, endTime is required",
+    });
+  } else if (err.name === "AUCTION_CLOSED") {
+    res.status(400).json({ message: "Auction is Closed" });
+  } else if (err.name === "INVALID_AMOUNT") {
+    res.status(400).json({ message: "Invalid Input Amount" });
+  } else if (err.name === "AMOUNT_REQUIRED") {
+    res.status(400).json({ message: "Amount is required" });
+  } else if (err.name === "INVALID_AMOUNT_MIN") {
+    res
+      .status(400)
+      .json({ message: "Amount must be higher minimum bid increment" });
   }
 }
 

@@ -11,13 +11,25 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       User.hasMany(models.Sneaker, { foreignKey: "UserId" });
-      User.hasMany(models.Auction, { foreignKey: "UserId" });
-      User.hasMany(models.Auction, { foreignKey: "WinnerId" });
+      User.hasMany(models.Auction, {
+        as: "CreatedAuctions",
+        foreignKey: "UserId",
+      });
+      User.hasMany(models.Auction, {
+        as: "WonAuctions",
+        foreignKey: "WinnerId",
+      });
       User.hasMany(models.Bid, { foreignKey: "UserId" });
       User.hasMany(models.Preorder, { foreignKey: "UserId" });
       User.hasMany(models.PreorderTransaction, { foreignKey: "UserId" });
-      User.hasMany(models.UserRating, { foreignKey: "RatedUserId" });
-      User.hasMany(models.UserRating, { foreignKey: "ReviewerId" });
+      User.hasMany(models.UserRating, {
+        as: "Direview",
+        foreignKey: "RatedUserId",
+      });
+      User.hasMany(models.UserRating, {
+        as: "Reviewer",
+        foreignKey: "ReviewerId",
+      });
     }
   }
   User.init(
