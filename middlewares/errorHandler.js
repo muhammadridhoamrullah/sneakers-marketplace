@@ -22,6 +22,14 @@ async function errorHandling(err, req, res, next) {
       message:
         "Name, Price, Brand, Release Year, Size, Condition, Colorway, Image URL, Box is required",
     });
+  } else if (err.name === "DATA_NOT_FOUND") {
+    res.status(404).json({ message: "Data Not Found" });
+  } else if (err.name === "FORBIDDEN") {
+    res.status(403).json({ message: "You Have No Access" });
+  } else if (err.name === "UPDATE_FAILED") {
+    res.status(400).json({ message: "Update Failed" });
+  } else if (err.name === "DELETE_FAILED") {
+    res.status(400).json({ message: "Delete Failed" });
   }
 }
 
