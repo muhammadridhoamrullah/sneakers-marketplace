@@ -82,7 +82,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       status: {
         type: DataTypes.STRING,
-        allowNullL: false,
+        allowNull: false,
         validate: {
           notNull: {
             msg: "Status is required",
