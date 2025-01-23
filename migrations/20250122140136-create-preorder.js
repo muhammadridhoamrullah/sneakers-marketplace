@@ -45,6 +45,7 @@ module.exports = {
       },
       status: {
         type: Sequelize.STRING,
+        defaultValue: "Active",
       },
       UserId: {
         type: Sequelize.INTEGER,

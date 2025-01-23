@@ -1,5 +1,43 @@
 # Dokumentasi API Marketplace Sneakers Edisi Terbatas
 
+User :
+1. Sneaker (UserId)
+2. Auction 2 (WinnerId dan UserId)
+3. Bid (UserId)
+4. Preorder (UserId)
+5. Preorder Transaction (UserId)
+6. UserRating 2 (RatedUserId dan ReviewerId)
+
+Sneaker : 
+1. Auction (SneakerId)
+2. belongsTo (models.user { fk: "UserId"}
+
+Auction : 
+1. Bid (AuctionId)
+2. UserRating (AuctionId)
+3. belongsTo (models.Sneaker, { fk: "SneakerId }
+4. belongsTo (models.User, { fk: "UserId" }
+5. belongsTo (models.User, { fk: "WinnerId" }
+
+Bid : 
+1. belongsTo (models.Auction, { fk: "AuctionId" }
+2. belongsTo (models.User, { fk: "UserId" }
+
+Preorder : 
+1. Preorder Transaction (PreOrderId)
+2. belongsTo (models.User, { fk : "UserId" }
+
+PreorderTransaction : 
+1. UserRating (PreorderTransactionId)
+2. belongsTo (models.PreOrder, { fk :"PreOrderId" }
+3. belongsTo (models.User, { fk : "UserId" }
+
+UserRating : 
+1. belongsTo (models.User, { fk : "RatedUserId" }
+2. belongsTo (models.User, { fk : "ReviewerId" }
+3. belongsTo (models.Auction, { fk : "AuctionId" }
+4. belongsTo (models.PreorderTransaction, { fk : "PreorderTransactionId" }
+
 ## Model
 
 ### Model User

@@ -38,6 +38,7 @@ module.exports = {
       },
       status: {
         type: Sequelize.STRING,
+        defaultValue: "Pending",
       },
       trackingNumber: {
         type: Sequelize.STRING,

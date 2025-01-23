@@ -1,0 +1,29 @@
+[
+  {
+    "AuctionId": 1,
+    "UserId": 3,
+    "amount": 1500000,
+    "autoBidLimit": 0,
+    "timestamp": "2025-02-01T12:00:00Z",
+    "isHighestBid": true,
+    "status": "Active"
+  },
+  {
+    "AuctionId": 2,
+    "UserId": 4,
+    "amount": 1600000,
+    "autoBidLimit": 0,
+    "timestamp": "2025-02-01T13:00:00Z",
+    "isHighestBid": false,
+    "status": "Active"
+  },
+  {
+    "AuctionId": 2,
+    "UserId": 5,
+    "amount": 1500000,
+    "autoBidLimit": 0,
+    "timestamp": "2025-02-01T14:00:00Z",
+    "isHighestBid": true,
+    "status": "Active"
+  }
+]

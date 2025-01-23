@@ -1,0 +1,32 @@
+[
+  {
+    "SneakerId": 1,
+    "startingPrice": 1000000,
+    "currentPrice": 1500000,
+    "reservePrice": 1800000,
+    "minBidIncrement": 50000,
+    "startTime": "2025-02-01T10:00:00Z",
+    "endTime": "2025-02-05T10:00:00Z",
+    "allowAutoBid": true,
+    "buyNowPrice": 2200000,
+    "status": "Active",
+    "WinnerId": null,
+    "UserId": 2,
+    "totalBids": 5
+  },
+  {
+    "SneakerId": 2,
+    "startingPrice": 2000000,
+    "currentPrice": 2200000,
+    "reservePrice": 2500000,
+    "minBidIncrement": 50000,
+    "startTime": "2025-02-01T10:00:00Z",
+    "endTime": "2025-02-05T10:00:00Z",
+    "allowAutoBid": true,
+    "buyNowPrice": 3000000,
+    "status": "Active",
+    "WinnerId": null,
+    "UserId": 2,
+    "totalBids": 3
+  }
+]

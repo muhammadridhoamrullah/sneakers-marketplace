@@ -18,6 +18,7 @@ module.exports = {
       },
       role: {
         type: Sequelize.STRING,
+        defaultValue: "Buyer",
       },
       isVerifiedReseller: {
         type: Sequelize.BOOLEAN,

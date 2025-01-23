@@ -1,0 +1,19 @@
+[
+  {
+    "name": "Nike Air Max 97",
+    "brand": "Nike",
+    "releaseDate": "2025-03-01",
+    "expectedDeliveryDate": "2025-03-15",
+    "price": 1800000,
+    "retailPrice": 1600000,
+    "description": "Nike Air Max 97 terbaru dengan desain klasik.",
+    "imageUrl": "https://static.nike.com/a/images/f_auto/dpr_1.0,cs_srgb/h_831,c_limit/86a02be2-d885-49c2-934c-a601fd115da7/the-history-of-the-air-max-97.jpg",
+    "retailStore": "Nike Store",
+    "guaranteed": true,
+    "refundPolicy": "Refund hanya dapat dilakukan jika pesanan dibatalkan sebelum dikirim.",
+    "status": "Open",
+    "UserId": 2,
+    "totalSlots": 100,
+    "remainingSlots": 100
+  }
+]

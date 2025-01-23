@@ -1,0 +1,37 @@
+[
+  {
+    "email": "admin@gmail.com",
+    "password": "1234567890",
+    "role": "Admin",
+    "isVerifiedReseller": true,
+    "resellerVerificationStatus": "Accepted"
+  },
+  {
+    "email": "seller1@gmail.com",
+    "password": "1234567890",
+    "role": "Seller",
+    "isVerifiedReseller": true,
+    "resellerVerificationStatus": "Accepted"
+  },
+  {
+    "email": "buyer1@gmail.com",
+    "password": "1234567890",
+    "role": "Buyer",
+    "isVerifiedReseller": false,
+    "resellerVerificationStatus": "Pending"
+  },
+  {
+    "email": "kimminji@gmail.com",
+    "password": "1234567890",
+    "role": "Buyer",
+    "isVerifiedReseller": true,
+    "resellerVerificationStatus": "Accepted"
+  },
+  {
+    "email": "kanghaerin@gmail.com",
+    "password": "1234567890",
+    "role": "Buyer",
+    "isVerifiedReseller": true,
+    "resellerVerificationStatus": "Accepted"
+  }
+]
