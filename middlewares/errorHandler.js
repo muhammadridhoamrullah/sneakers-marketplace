@@ -45,6 +45,17 @@ async function errorHandling(err, req, res, next) {
     res
       .status(400)
       .json({ message: "Amount must be higher minimum bid increment" });
+  } else if (err.name === "NO_BIDS_FOUND") {
+    res.status(404).json({ message: "No Bids Found" });
+  } else if (err.name === "INVALID_INPUT_PREORDER") {
+    res.status(400).json({
+      message:
+        "Name, Brand, Release Date, Expected Devlivery Date, Price, Retail Price, Description, Image URL, Total Slots, Remaining Slots is required",
+    });
+  } else if (err.name === "INVALID_INPUT_UPDATE_PREORDERSTATUS") {
+    res.status(400).json({
+      message: "Status is required",
+    });
   }
 }
 

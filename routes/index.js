@@ -1,6 +1,9 @@
 const { Controller } = require("../controllers/controller");
 const { authentication } = require("../middlewares/authentication");
 const {
+  authenticationPreorder,
+} = require("../middlewares/authenticationPreorder");
+const {
   authenticationSneaker,
 } = require("../middlewares/authenticationSneaker");
 const { errorHandling } = require("../middlewares/errorHandler");
@@ -58,6 +61,24 @@ router.get("/auctions/:id", Controller.getAuctionById);
 router.post("/auctions/:id/bid", Controller.bidAuction);
 router.get("/auctions/:id/bids", Controller.getBidByAuctionId);
 router.post("/auctions/:id/end", Controller.endAuction);
+
+// ### Endpoint Preorder (Terotentikasi)
+
+// - `POST /preorders`
+// - `GET /preorders`
+// - `GET /preorders/:id`
+// - `PATCH /preorders/:id/status`
+// - `GET /user/preorders`
+
+router.post("/preorders", Controller.addPreorder);
+router.get("/preorders", Controller.getAllPreorders);
+router.get("/preorders/:id", Controller.getPreorderById);
+router.patch(
+  "/preorders/:id/status",
+  authenticationPreorder,
+  Controller.updatePreorderStatus
+);
+router.get("/user/preorders", Controller.getPreorderByUserId);
 
 router.use(errorHandling);
 

@@ -594,7 +594,7 @@ class Controller {
       }
 
       if (findAuction.status === "Closed") {
-        throw { name: "AUCTION_ALREADY_CLOSED" };
+        throw { name: "AUCTION_CLOSED" };
       }
 
       const highestBid = await Bid.findOne({
@@ -623,6 +623,190 @@ class Controller {
         message: "Auction has been closed",
         winner: highestBid.User,
         winningBid: highestBid.amount,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async addPreorder(req, res, next) {
+    try {
+      if (req.user.role === "Admin" || req.user.role === "Seller") {
+        const {
+          name,
+          brand,
+          releaseDate,
+          expectedDeliveryDate,
+          price,
+          retailPrice,
+          description,
+          imageUrl,
+          retailStore,
+          guaranteed,
+          refundPolicy,
+          totalSlots,
+          remainingSlots,
+        } = req.body;
+
+        if (
+          !name ||
+          !brand ||
+          !releaseDate ||
+          !expectedDeliveryDate ||
+          !price ||
+          !retailPrice ||
+          !description ||
+          !imageUrl ||
+          !totalSlots ||
+          !remainingSlots
+        ) {
+          throw { name: "INVALID_INPUT_PREORDER" };
+        }
+
+        const addingPreorder = await Preorder.create({
+          name,
+          brand,
+          releaseDate,
+          expectedDeliveryDate,
+          price,
+          retailPrice,
+          description,
+          imageUrl,
+          retailStore,
+          guaranteed,
+          refundPolicy,
+          totalSlots,
+          remainingSlots,
+          status: "Active",
+          UserId: req.user.id,
+        });
+
+        res.status(201).json({
+          message: "Preorder has been added",
+          data: addingPreorder,
+        });
+      } else {
+        throw { name: "FORBIDDEN" };
+      }
+    } catch (error) {
+      console.log(error, "error di addPreorder");
+
+      next(error);
+    }
+  }
+
+  static async getAllPreorders(req, res, next) {
+    try {
+      const allPreorders = await Preorder.findAll({
+        include: {
+          model: User,
+          attributes: {
+            exclude: ["password"],
+          },
+        },
+        order: [["releaseDate", "DESC"]],
+        where: {
+          status: "Active",
+        },
+      });
+
+      res.status(200).json({
+        data: allPreorders,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async getPreorderById(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      const findPreorderById = await Preorder.findByPk(id, {
+        include: {
+          model: User,
+          attributes: {
+            exclude: ["password"],
+          },
+        },
+      });
+
+      if (!findPreorderById) {
+        throw { name: "DATA_NOT_FOUND" };
+      }
+
+      res.status(200).json({
+        data: findPreorderById,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async updatePreorderStatus(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+      const findPreorderById = await Preorder.findByPk(id, {
+        include: {
+          model: User,
+          attributes: {
+            exclude: ["password"],
+          },
+        },
+      });
+
+      if (!findPreorderById) {
+        throw { name: "DATA_NOT_FOUND" };
+      }
+
+      if (!status) {
+        throw { name: "INVALID_INPUT_UPDATE_PREORDERSTATUS" };
+      }
+
+      const updatingStatus = await Preorder.update(
+        {
+          status,
+        },
+        {
+          where: {
+            id,
+          },
+        }
+      );
+
+      if (updatingStatus[0] === 0) {
+        throw { name: "UPDATE_FAILED" };
+      }
+
+      res.status(200).json({
+        message: "Preorder status has been updated",
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async getPreorderByUserId(req, res, next) {
+    try {
+      const findAllpreOrderByUserId = await Preorder.findAll({
+        include: {
+          model: User,
+          attributes: {
+            exclude: ["password"],
+          },
+        },
+        where: {
+          UserId: req.user.id,
+        },
+      });
+
+      if (findAllpreOrderByUserId.length === 0) {
+        throw { name: "DATA_NOT_FOUND" };
+      }
+
+      res.status(200).json({
+        data: findAllpreOrderByUserId,
       });
     } catch (error) {
       next(error);
