@@ -56,6 +56,20 @@ async function errorHandling(err, req, res, next) {
     res.status(400).json({
       message: "Status is required",
     });
+  } else if (err.name === "ALREADY_AUTHENTIC_CHECKED") {
+    res.status(400).json({ message: "Sneaker is already authenticated" });
+  } else if (err.name === "INVALID_INPUT_AUTHENTICITY_STATUS") {
+    res.status(400).json({ message: "Authenticity Status is required" });
+  } else if (err.name === "USER_NOT_SELLER") {
+    res.status(400).json({ message: "User not seller" });
+  } else if (err.name === "USER_ALREADY_VERIFIED") {
+    res.status(400).json({ message: "User (Seller) already verified" });
+  } else if (err.name === "INVALID_INPUT_VERIFY_RESELLER") {
+    res
+      .status(400)
+      .json({
+        message: "Is Verified Reseller and Verifiaction Status is required",
+      });
   }
 }
 

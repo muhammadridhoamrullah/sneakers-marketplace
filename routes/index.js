@@ -6,6 +6,7 @@ const {
 const {
   authenticationSneaker,
 } = require("../middlewares/authenticationSneaker");
+const { authorizationAdmin } = require("../middlewares/authorizationAdmin");
 const { errorHandling } = require("../middlewares/errorHandler");
 
 const router = require("express").Router();
@@ -79,6 +80,24 @@ router.patch(
   Controller.updatePreorderStatus
 );
 router.get("/user/preorders", Controller.getPreorderByUserId);
+
+// ### Endpoint Verifikasi dan Rating User
+
+// - `POST /authenticity-check`
+// - `PATCH /user/verify-reseller`
+// - `GET /user/ratings`
+// - `POST /user/:id/rating`
+
+router.post(
+  "/authenticity-check/:id",
+  authorizationAdmin,
+  Controller.authenticityCheck
+);
+router.patch(
+  "/user/verify-reseller/:id",
+  authorizationAdmin,
+  Controller.verifyReseller
+);
 
 router.use(errorHandling);
 

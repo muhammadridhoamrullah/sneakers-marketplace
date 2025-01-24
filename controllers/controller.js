@@ -497,7 +497,7 @@ class Controller {
         },
       });
 
-      if (amount <= findAuction.minBidIncrement) {
+      if (amount < findAuction.minBidIncrement) {
         throw { name: "INVALID_AMOUNT_MIN" };
       }
 
@@ -812,6 +812,87 @@ class Controller {
       next(error);
     }
   }
+
+  static async authenticityCheck(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      const { authenticityStatus } = req.body;
+
+      const findSneakerToBeCheck = await Sneaker.findByPk(id);
+      if (!authenticityStatus) {
+        throw { name: "INVALID_INPUT_AUTHENTICITY_STATUS" };
+      }
+      if (!findSneakerToBeCheck) {
+        throw { name: "DATA_NOT_FOUND" };
+      }
+
+      if (findSneakerToBeCheck.authenticityStatus === "Verified") {
+        throw { name: "ALREADY_AUTHENTIC_CHECKED" };
+      }
+
+      await Sneaker.update(
+        {
+          authenticityStatus,
+        },
+        {
+          where: {
+            id,
+          },
+        }
+      );
+
+      res.status(200).json({
+        message: "Sneaker has been checked",
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async verifyReseller(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { isVerifiedReseller, resellerVerificationStatus } = req.body;
+      const findUserToBeVerified = await User.findByPk(id);
+
+      if (!isVerifiedReseller || !resellerVerificationStatus) {
+        throw { name: "INVALID_INPUT_VERIFY_RESELLER" };
+      }
+      if (!findUserToBeVerified) {
+        throw { name: "DATA_NOT_FOUND" };
+      }
+
+      if (findUserToBeVerified.role === "Buyer") {
+        throw { name: "USER_NOT_SELLER" };
+      }
+
+      if (findUserToBeVerified.isVerified) {
+        throw { name: "USER_ALREADY_VERIFIED" };
+      }
+
+      await User.update(
+        {
+          isVerifiedReseller,
+          resellerVerificationStatus,
+        },
+        {
+          where: {
+            id,
+          },
+        }
+      );
+
+      res.status(200).json({
+        message: "User has been verified as Verified Seller",
+        data: findUserToBeVerified,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  
 }
 
 module.exports = {
