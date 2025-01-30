@@ -23,6 +23,8 @@ class Controller {
       const registeringUser = await User.create({
         email,
         password,
+        isVerifiedReseller: false,
+        resellerVerificationStatus: "Unverified",
       });
 
       res.status(201).json({
@@ -104,7 +106,6 @@ class Controller {
         collaboration,
         imageUrl,
         box,
-        authenticityStatus,
       } = req.body;
 
       if (
@@ -132,7 +133,7 @@ class Controller {
         collaboration,
         imageUrl,
         box,
-        authenticityStatus,
+        authenticityStatus: "Unverified",
         UserId: req.user.id,
       });
 
@@ -343,7 +344,6 @@ class Controller {
   static async addAuction(req, res, next) {
     try {
       const {
-        SneakerId,
         startingPrice,
         reservePrice,
         minBidIncrement,
@@ -351,35 +351,51 @@ class Controller {
         endTime,
         buyNowPrice,
       } = req.body;
-
-      if (
-        !SneakerId ||
-        !startingPrice ||
-        !minBidIncrement ||
-        !startTime ||
-        !endTime
-      ) {
+      const { id } = req.params;
+      if (!startingPrice || !minBidIncrement || !startTime || !endTime) {
         throw { name: "INVALID_INPUT_AUCTION" };
       }
+      const cekstartingPrice = parseFloat(req.body.startingPrice);
+      const cekbuyNowPrice = parseFloat(req.body.buyNowPrice);
+      console.log(typeof startingPrice, "cekstartingPrice");
+      console.log(typeof buyNowPrice, "cekbuyNowPrice");
 
-      const findSneaker = await Sneaker.findByPk(SneakerId);
+      if (
+        Date.parse(startTime) < Date.now() ||
+        Date.parse(endTime) < Date.parse(startTime) ||
+        Date.parse(endTime) < Date.now()
+      ) {
+        throw { name: "INVALID_DATE_AUCTION" };
+      }
+
+      if (buyNowPrice < startingPrice) {
+        throw { name: "INVALID_BUY_NOW_PRICE" };
+      }
+      const findSneaker = await Sneaker.findByPk(id);
 
       if (!findSneaker) {
         throw { name: "DATA_NOT_FOUND" };
       }
-      console.log(findSneaker.UserId, "ini FindSneaker.UserId");
-      console.log(req.user.id, "ini req.user.id");
+
+      const findSneakerInAuction = await Auction.findOne({
+        where: {
+          SneakerId: id,
+        },
+      });
+
+      if (findSneakerInAuction) {
+        throw { name: "SNEAKER_ALREADY_IN_AUCTION" };
+      }
 
       if (findSneaker.UserId === req.user.id || req.user.role === "Admin") {
         const addToAuction = await Auction.create({
-          SneakerId,
+          SneakerId: id,
           startingPrice,
           currentPrice: startingPrice,
           reservePrice,
           minBidIncrement,
           startTime,
           endTime,
-          minBidIncrement,
           buyNowPrice,
           status: "Active",
           UserId: req.user.id,
@@ -472,13 +488,15 @@ class Controller {
   static async bidAuction(req, res, next) {
     try {
       const { id } = req.params;
-      const { amount, autoBidLimit } = req.body;
+      const { amount } = req.body;
 
       const findAuction = await Auction.findByPk(id, {
         include: {
           model: Sneaker,
         },
       });
+
+      console.log(findAuction, "findAuction");
 
       if (!findAuction) {
         throw { name: "DATA_NOT_FOUND" };
@@ -490,6 +508,11 @@ class Controller {
       if (!amount) {
         throw { name: "AMOUNT_REQUIRED" };
       }
+
+      if (amount < findAuction.minBidIncrement) {
+        throw { name: "INVALID_AMOUNT_MIN" };
+      }
+
       const findHighestBid = await Bid.findOne({
         where: {
           AuctionId: id,
@@ -497,9 +520,7 @@ class Controller {
         },
       });
 
-      if (amount < findAuction.minBidIncrement) {
-        throw { name: "INVALID_AMOUNT_MIN" };
-      }
+      console.log(findHighestBid, "findHighestBid");
 
       if (findHighestBid) {
         if (amount < findHighestBid.amount + findAuction.minBidIncrement) {
@@ -511,21 +532,24 @@ class Controller {
           { where: { id: findHighestBid.id } }
         );
       }
+      console.log("Jalan");
 
       const newBid = await Bid.create({
         AuctionId: id,
         UserId: req.user.id,
         amount,
-        autoBidLimit,
+        autoBidLimit: 0,
         isHighestBid: true,
         timestamp: new Date(),
         status: "Active",
       });
+      console.log("Jalan 2");
 
       await Auction.update(
         { currentPrice: amount, totalBids: findAuction.totalBids + 1 },
         { where: { id } }
       );
+      console.log("Jalan 3");
 
       res.status(201).json({
         message: "Bid has been placed",
@@ -597,33 +621,37 @@ class Controller {
         throw { name: "AUCTION_CLOSED" };
       }
 
-      const highestBid = await Bid.findOne({
-        where: {
-          AuctionId: id,
-          isHighestBid: true,
-        },
-        include: {
-          model: User,
-          attributes: {
-            exclude: ["password"],
+      if (req.user.role === "Admin" || req.user.id === findAuction.UserId) {
+        const highestBid = await Bid.findOne({
+          where: {
+            AuctionId: id,
+            isHighestBid: true,
           },
-        },
-      });
+          include: {
+            model: User,
+            attributes: {
+              exclude: ["password"],
+            },
+          },
+        });
 
-      if (!highestBid) {
-        throw { name: "NO_BIDS_FOUND" };
+        if (!highestBid) {
+          throw { name: "NO_BIDS_FOUND" };
+        }
+
+        await Auction.update(
+          { status: "Closed", WinnerId: highestBid.UserId },
+          { where: { id } }
+        );
+
+        res.status(200).json({
+          message: "Auction is finished",
+          winner: highestBid.User,
+          winningBid: highestBid.amount,
+        });
+      } else {
+        throw { name: "FORBIDDEN" };
       }
-
-      await Auction.update(
-        { status: "Closed", WinnerId: highestBid.UserId },
-        { where: { id } }
-      );
-
-      res.status(200).json({
-        message: "Auction has been closed",
-        winner: highestBid.User,
-        winningBid: highestBid.amount,
-      });
     } catch (error) {
       next(error);
     }
@@ -892,7 +920,62 @@ class Controller {
     }
   }
 
-  
+  static async getSneakerByUserId(req, res, next) {
+    try {
+      const userId = req.user.id;
+      console.log(userId, "ini userId");
+
+      const findSneakerByUserId = await Sneaker.findAll({
+        include: {
+          model: User,
+          attributes: {
+            exclude: ["password"],
+          },
+        },
+        where: {
+          UserId: userId,
+        },
+        order: [["createdAt", "ASC"]],
+      });
+      console.log(findSneakerByUserId, "ini findSneakerByUserId");
+
+      if (findSneakerByUserId.length === 0) {
+        throw { name: "DATA_NOT_FOUND" };
+      }
+
+      res.status(200).json({
+        data: findSneakerByUserId,
+      });
+    } catch (error) {
+      console.log(error, "error di getSneakerByUserId");
+
+      next(error);
+    }
+  }
+
+  static async getAuctionByUserId(req, res, next) {
+    try {
+      const findAuctionByUserId = await Auction.findAll({
+        include: {
+          model: Sneaker,
+        },
+        where: {
+          UserId: req.user.id,
+        },
+        order: [["createdAt", "ASC"]],
+      });
+
+      if (findAuctionByUserId.length === 0) {
+        throw { name: "DATA_NOT_FOUND" };
+      }
+
+      res.status(200).json({
+        data: findAuctionByUserId,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = {

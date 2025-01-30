@@ -34,6 +34,7 @@ router.get("/sneakers", Controller.getAllSneakers);
 
 router.post("/sneakers", Controller.addSneaker);
 router.get("/sneakers/popular", Controller.getPopularSneakers);
+router.get("/sneakers/user", Controller.getSneakerByUserId);
 
 router.get("/sneakers/:id", Controller.getSneakerById);
 router.get("/sneakers/brand/:brand", Controller.getSneakerByBrand);
@@ -56,9 +57,11 @@ router.delete("/sneakers/:id", authenticationSneaker, Controller.deleteSneaker);
 // - `POST /auctions/:id/bid`
 // - `GET /auctions/:id/bids`
 
-router.post("/auctions", Controller.addAuction);
 router.get("/auctions", Controller.getAllAuctions);
+router.get("/auctions/user", Controller.getAuctionByUserId);
+router.post("/add-auctions/:id", Controller.addAuction);
 router.get("/auctions/:id", Controller.getAuctionById);
+
 router.post("/auctions/:id/bid", Controller.bidAuction);
 router.get("/auctions/:id/bids", Controller.getBidByAuctionId);
 router.post("/auctions/:id/end", Controller.endAuction);

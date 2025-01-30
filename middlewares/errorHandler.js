@@ -65,11 +65,17 @@ async function errorHandling(err, req, res, next) {
   } else if (err.name === "USER_ALREADY_VERIFIED") {
     res.status(400).json({ message: "User (Seller) already verified" });
   } else if (err.name === "INVALID_INPUT_VERIFY_RESELLER") {
+    res.status(400).json({
+      message: "Is Verified Reseller and Verifiaction Status is required",
+    });
+  } else if (err.name === "INVALID_DATE_AUCTION") {
+    res.status(400).json({ message: "End Time must be later than Start Time" });
+  } else if (err.name === "INVALID_BUY_NOW_PRICE") {
     res
       .status(400)
-      .json({
-        message: "Is Verified Reseller and Verifiaction Status is required",
-      });
+      .json({ message: "Buy Now Price must be higher than Starting Price" });
+  } else if (err.name === "SNEAKER_ALREADY_IN_AUCTION") {
+    res.status(400).json({ message: "Sneaker is already in auction" });
   }
 }
 
